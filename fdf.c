@@ -14,14 +14,15 @@
 #include "struct.h"
 #include <math.h>
 # define RGB(r, g, b)(256 * 256 * (int)(r) + 256 * (int)(g) + (int)(b))
-#define WIDTH 900
-#define HEIGTH 900
+#define WIDTH 1500
+#define HEIGTH 1500
 
 int couleur(double t)
 {
   return ((RGB(127.5 * (cos(t) + 1), 127.5 * (sin(t) + 1), 127.5 * (1 - cos(t)))));
 }
 
+char ***set_coordq(char ***coord, float i, float x, float y, float zoom);
 char ***set_coord2(char ***coord, int i, int x, int y, int zoom);
 char ***set_coord3(char ***coord, int i, int x, int y, int zoom, int rotate);
 
@@ -151,7 +152,7 @@ void place_img(t_struct *param, float xd, float yd)
 {
   mlx_destroy_image(param->mlx, param->img->img_ptr);
   param->img->img_ptr = mlx_new_image(param->mlx, WIDTH, HEIGTH);
-  set_coord(param->coord, param->i, xd, yd, param->zoom);
+  set_coordq(param->coord, param->i, xd, yd, param->zoom);
   draw_with_tab_on_img(param->coord, param->i, param->maxline, param);
   mlx_put_image_to_window(param->mlx, param->win, param->img->img_ptr, 0, 0);
 }
@@ -247,6 +248,22 @@ int close_mlx(int keycode, t_struct *param)
       draw_with_tab_on_img(param->coord, param->i, param->maxline, param);
       mlx_put_image_to_window(param->mlx, param->win, param->img->img_ptr, 0, 0);
     }
+    if(keycode == 124)
+      {
+	mlx_destroy_image(param->mlx, param->img->img_ptr);
+	param->img->img_ptr = mlx_new_image(param->mlx, WIDTH, HEIGTH);
+	set_coord3(param->coord, param->i, xd, yd, param->zoom,45);
+	draw_with_tab_on_img(param->coord, param->i, param->maxline, param);
+	mlx_put_image_to_window(param->mlx, param->win, param->img->img_ptr, 0, 0);
+      }
+    if(keycode == 91)
+      {
+	mlx_destroy_image(param->mlx, param->img->img_ptr);
+	param->img->img_ptr = mlx_new_image(param->mlx, WIDTH, HEIGTH);
+	set_coordq(param->coord, param->i, xd, yd, param->zoom);
+	draw_with_tab_on_img(param->coord, param->i, param->maxline, param);
+	mlx_put_image_to_window(param->mlx, param->win, param->img->img_ptr, 0, 0);
+      }
   return (0);
 }
 
@@ -435,8 +452,63 @@ char ***set_coord(char ***coord, float i, float x, float y, float zoom)
 	  if(coord[index][2][0] != '0')
 	    {
 	      v = ft_atoi(coord[index][2]);
-	      xtemp = x + v;
+	      xtemp = x; //+ v;
 	      ytemp = y - ((v * 2)  + 1);
+	      j++;
+	    }
+	}
+      if(j == 0)
+	{
+	  coord[index][0] = ft_itoa(x);
+	  coord[index][1] = ft_itoa(y);
+	}
+      else
+	{
+	  coord[index][0] = ft_itoa(xtemp);
+	  coord[index][1] = ft_itoa(ytemp);
+	  j = 0;
+	}
+      index++;
+    }
+  return (coord);
+}
+
+char ***set_coordq(char ***coord, float i, float x, float y, float zoom)
+{
+  int index;
+  float xdep;
+  float ydep;
+  float xtemp;
+  float ytemp;
+  float j;
+  float v;
+
+  v = 0;
+  j = 0;
+  index = 0;
+  xdep = x;
+  ydep = y;
+  while(index < i)
+    {
+      if(coord[index][2][0] == '\n')
+	{
+	  x = xdep;
+	  y = ydep;
+	  x -= zoom * 0.86;
+	  y += zoom* 0.5;
+	  xdep = x;
+	  ydep = y;
+	}
+      else
+	{
+	  x += zoom * 0.86;
+	  y += zoom * 0.5;
+	  if(coord[index][2][0] != '0')
+	    {
+	      v = ft_atoi(coord[index][2]);
+	      //	      xtemp = x + v + (zoom - (zoom -1));
+	      xtemp  = x;
+	      ytemp = y - (v * zoom);
 	      j++;
 	    }
 	}
@@ -520,7 +592,7 @@ void draw_with_tab(char ***coord, int i, int maxline, t_struct *param)
 
 int testa(x1,y1,x2,y2)
 {
-  if((x1 >= WIDTH) || (x2 >= WIDTH) || (y1 >= WIDTH) || (y2 >= WIDTH) || (y1 <= 0) || (y2 <= 0))
+  if((x1 >= WIDTH) || (x2 >= WIDTH) || (y1 >= WIDTH) || (y2 >= WIDTH) || (y1 <= 0) || (y2 <= 0) || (x1 <= 0) || (x2 <= 0))
     return (0);
   return (1);
 }
@@ -557,12 +629,15 @@ void draw_with_tab_on_img(char ***coord, int i, int maxline, t_struct *param)
 	  y2 = ft_atoi(coord[index + 1][1]);
 	  val1 = ft_atoi(coord[index][2]);
 	  val2 = ft_atoi(coord[index + 1][2]);
-	  if(coord[index + 1][2][0] != '\n' && testa(x1,y1,x2,y2))
+	  if(coord[index + 1][2][0] != '\n')
 	    {
-	      draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));
+	      if(testa(x1,y1,x2,y2))
+		draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));
 	    }
 	  else
 	    futurindex++;
+	  
+	 
 	}
       if(index + maxline + 1 < i)
 	{
@@ -572,10 +647,13 @@ void draw_with_tab_on_img(char ***coord, int i, int maxline, t_struct *param)
 	  y2 = ft_atoi(coord[index + maxline + 1][1]);
 	  val1 = ft_atoi(coord[index][2]);
 	  val2 = ft_atoi(coord[index + maxline + 1][2]);
-	  if(coord[index + maxline + 1][2][0] != '\n' && testa(x1,y1,x2,y2))
+	  if(coord[index + maxline + 1][2][0] != '\n')
 	    {
-	      draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));
+	      if(testa(x1,y1,x2,y2))
+		draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));
 	    }
+	  else
+	    futurindex++;
 	}
       if(futurindex > 0)
 	{
