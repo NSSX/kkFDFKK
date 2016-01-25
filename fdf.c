@@ -37,7 +37,8 @@ void draw_line2(void *mlx, void *win, float xi, float yi, float xf, float yf, in
   yinc = ( dy > 0 ) ? 1 : -1 ;
   dx = abs(dx) ;
   dy = abs(dy) ;
-  mlx_pixel_put(mlx, win, x, y, color);
+
+    mlx_pixel_put(mlx, win, x, y, color);
   if ( dx > dy ) {
     cumul = dx / 2 ;
     for ( i = 1 ; i <= dx ; i++ ) {
@@ -46,7 +47,8 @@ void draw_line2(void *mlx, void *win, float xi, float yi, float xf, float yf, in
       if ( cumul >= dx ) {
 	cumul -= dx ;
 	y += yinc ; }
-      mlx_pixel_put(mlx, win, x, y, color); } }
+
+	mlx_pixel_put(mlx, win, x, y, color); } }
   else {
     cumul = dy / 2 ;
     for ( i = 1 ; i <= dy ; i++ ) {
@@ -55,7 +57,8 @@ void draw_line2(void *mlx, void *win, float xi, float yi, float xf, float yf, in
       if ( cumul >= dy ) {
 	cumul -= dy ;
 	x += xinc ; }
-      mlx_pixel_put(mlx, win, x, y, color); } }
+
+	mlx_pixel_put(mlx, win, x, y, color); } }
 }
 
 void draw_line_on_img(t_img *myimg,float xi, float yi, float xf, float yf, int color)
@@ -187,22 +190,22 @@ int close_mlx(int keycode, t_struct *param)
  
   if(keycode == 53)
     exit(1);
-  if(keycode == 2)
+  if(keycode == 0)
     {
       xd += 40;
       place_img(param, xd, yd);
     }
-  if(keycode == 1)
+  if(keycode == 13)
     {
       yd += 40;
       place_img(param, xd, yd);
     }
-  if(keycode == 13)
+  if(keycode == 1)
     {
       yd -= 40;
       place_img(param, xd, yd);
     }
-  if(keycode == 0)
+  if(keycode == 2)
     {
       xd -= 40;
       place_img(param, xd, yd);
@@ -506,7 +509,6 @@ char ***set_coordq(char ***coord, float i, float x, float y, float zoom)
 	  if(coord[index][2][0] != '0')
 	    {
 	      v = ft_atoi(coord[index][2]);
-	      //	      xtemp = x + v + (zoom - (zoom -1));
 	      xtemp  = x;
 	      ytemp = y - (v * zoom);
 	      j++;
@@ -608,7 +610,7 @@ void draw_with_tab_on_img(char ***coord, int i, int maxline, t_struct *param)
   int val1;
   int futurindex;
   int val2;
-
+  int val3;
 
   val1 = 0;
   val2 = 0;
@@ -629,15 +631,64 @@ void draw_with_tab_on_img(char ***coord, int i, int maxline, t_struct *param)
 	  y2 = ft_atoi(coord[index + 1][1]);
 	  val1 = ft_atoi(coord[index][2]);
 	  val2 = ft_atoi(coord[index + 1][2]);
+	  if(index + maxline + 1 < i)
+	    val3 = ft_atoi(coord[index + maxline + 1][2]);
+	  //POUR TESTA LE METTRE DIRECTEMENT DANS LE TRUC DE BRENSENHAM
 	  if(coord[index + 1][2][0] != '\n')
 	    {
+	      /*      if(testa(x1,y1,x2,y2))
+		      draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));*/
+	      if(val1 + val2 < 0)
+		{
+		  color = 255 + (val1 + val2);
+		}
+	      else if(val1 + val2 >= 0 && val1 + val2 <= 3)
+		{
+		  color = 0xCCCC00;
+		}
+	      else if(val1 + val2 >= 4 && val1 + val2 <= 8)
+                {
+                  color = 0x4C9900;
+                }
+	      else if(val1 + val2 >= 9 && val1 + val2 <= 13)
+                {
+                  color = 0xFF8000;
+                }
+              else if(val1 + val2 >= 14 && val1 + val2 <= 21)
+                {
+                  color = 0xFF6666;
+                }
+	      else if(val1 + val2 >= 22 && val1 + val2 <= 29)
+                {
+                  color = 0x6600CC;
+                }
+	      else if(val1 + val2 >= 30 && val1 + val2 <= 60)
+                {
+                  color = 0x167341;
+                }
+	      else if(val1 + val2 >= 61 && val1 + val2 <= 90)
+                {
+                  color = 0xDE5A39;
+                }
+	      else if(val1 + val2 >= 91 && val1 + val2 <= 130)
+                {
+                  color = 0x5D6ADC;
+                }
+	      else if(val1 + val2 >= 131 && val1 + val2 <= 200)
+                {
+                  color = 0xFF99CC;
+                }
+	      else if(val1 + val2 >= 201 && val1 + val2 <= 350)
+                {
+                  color = 0x161D5F;
+                }
+	      else
+		color = 0xFFFFFF;
 	      if(testa(x1,y1,x2,y2))
-		draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));
+		draw_line_on_img(param->img,x1, y1, x2, y2, color);
 	    }
 	  else
-	    futurindex++;
-	  
-	 
+	    futurindex++;	 
 	}
       if(index + maxline + 1 < i)
 	{
@@ -649,8 +700,56 @@ void draw_with_tab_on_img(char ***coord, int i, int maxline, t_struct *param)
 	  val2 = ft_atoi(coord[index + maxline + 1][2]);
 	  if(coord[index + maxline + 1][2][0] != '\n')
 	    {
+	      /*	      if(testa(x1,y1,x2,y2))
+			      draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));*/
+	      if(val1 + val2 < 0)
+                {
+                  color = 255 + (val1 + val2);
+                }
+              else if(val1 + val2 >= 0 && val1 + val2 <= 3)
+                {
+                  color = 0xCCCC00;
+                }
+	      else if(val1 + val2 >= 4 && val1 + val2 <= 8)
+                {
+                  color = 0x4C9900;
+                }
+	      else if(val1 + val2 >= 9 && val1 + val2 <= 13)
+                {
+                  color = 0xFF8000;
+                }
+	      else if(val1 + val2 >= 14 && val1 + val2 <= 21)
+                {
+                  color = 0xFF6666;
+                }
+	      else if(val1 + val2 >= 22 && val1 + val2 <= 29)
+                {
+                  color = 0x6600CC;
+                }
+	      else if(val1 + val2 >= 30 && val1 + val2 <= 60)
+                {
+                  color = 0x167341;
+                }
+              else if(val1 + val2 >= 61 && val1 + val2 <= 90)
+                {
+                  color = 0xDE5A39;
+                }
+	      else if(val1 + val2 >= 91 && val1 + val2 <= 130)
+                {
+                  color = 0x5D6ADC;
+                }
+	      else if(val1 + val2 >= 131 && val1 + val2 <= 200)
+                {
+                  color = 0xFF99CC;
+                }
+	      else if(val1 + val2 >= 201 && val1 + val2 <= 350)
+                {
+                  color = 0x161D5F;
+                }
+              else
+                color = 0xFFFFFF;
 	      if(testa(x1,y1,x2,y2))
-		draw_line_on_img(param->img,x1, y1, x2, y2, couleur(val1 + val2));
+		draw_line_on_img(param->img,x1, y1, x2, y2, color);
 	    }
 	  else
 	    futurindex++;
